@@ -1,0 +1,76 @@
+dynamical_constraints:
+# configurations
+  - ctrl_prom1 = ~obs('ctrl_Prom1')
+  - ctrl_prom2 = ~obs('ctrl_Prom2')
+  - ctrl_rep = fixed(obs('ctrl_Rep'))
+  - ctrl_neu = fixed(~obs('ctrl_Neu'))
+  - ctrl_alt = fixed(~obs('ctrl_Alt'))
+  - treated_prom1 = ~obs('treated_Prom1')
+  - treated_prom2 = ~obs('treated_Prom2')
+  - treated_rep = fixed(obs('treated_Rep'))
+  - treated_neu = fixed(~obs('treated_Neu'))
+# inequalities
+  - ctrl_prom1 != treated_prom1
+  - ctrl_neu != obs('ctrl_Rep')
+  - ctrl_alt != obs('ctrl_Rep')
+  - treated_neu != obs('treated_Rep')
+# positive reachability
+  - ctrl_prom1 >= ctrl_rep
+  - ctrl_prom1 >= ctrl_prom2 >= ctrl_neu
+  - ctrl_prom2 >= ctrl_alt
+  - treated_prom1 >= treated_rep
+  - treated_prom1 >= treated_prom2 >= treated_neu
+# negative reachability
+  - ctrl_prom2 / ctrl_rep
+  - ctrl_prom2 / treated_rep
+  - treated_prom2 / ctrl_rep
+  - treated_prom2 / treated_rep
+  - ctrl_prom1 / treated_neu
+  - treated_prom1 / ctrl_neu
+  - treated_prom1 / ctrl_alt
+# universal constraints
+  - ctrl_prom1 >> 'fixpoints' ^ {obs('ctrl_Rep'), obs('ctrl_Neu'), obs('ctrl_Alt')}
+  - ctrl_prom2 >> 'fixpoints' ^ {obs('ctrl_Neu'), obs('ctrl_Alt')}
+  - treated_prom1 >> 'fixpoints' ^ {obs('treated_Rep'), obs('treated_Neu')}
+  - treated_prom2 >> 'fixpoints' ^ {obs('treated_Neu')}
+important_nodes:
+# granulocytic differentiation
+  - 'Rara'
+  - 'Rarb'
+  - 'Cebpe'
+  - 'Cebpa'
+  - 'Zfp36l1' # Plzf
+  - 'Spi1'
+# proliferation / cell cycle
+  - 'Myc'
+  - 'Skp2'
+  - 'Ccna2'
+  - 'Mdm2'
+  - 'E2f1'
+  - 'Ccnd1'
+  - 'Cdk2'
+  - 'Cdk4'
+  - 'Cdk6'
+  - 'Pcna'
+  - 'Pim1'
+# cell-cycle arrest / tumor suppressors
+  - 'Cdkn2d'
+  - 'Rb1'
+  - 'Cdkn1a'
+  - 'Cdkn1b'
+  - 'Trp53' # Tp53
+  - 'Bax'
+# epigenetic regulation
+  - 'Ezh2'
+# inflammatory signaling
+  - 'Nfkb1'
+  - 'Traf1'
+# ER stress
+  - 'Ddit4'
+  - 'Ppp1r15a'
+# Eosinophil marker
+  - 'Epx'
+  - 'Alox15'
+# Neutrophil marker
+  - 's100a9'
+mandatory_nodes:

@@ -219,3 +219,6 @@ __marimo__/
 
 # Others
 .ipynb_checkpoints/
+.scbolt
+project/
+resources/
