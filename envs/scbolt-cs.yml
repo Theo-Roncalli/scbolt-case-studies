@@ -1,4 +1,4 @@
-name: scbridge-analysis
+name: scbolt-cs
 channels:
   - colomoto
   - bioconda

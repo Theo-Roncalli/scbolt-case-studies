@@ -1,4 +1,4 @@
-name: scbridge-stream-legacy
+name: scbolt-cs-stream
 channels:
   - bioconda
   - conda-forge
