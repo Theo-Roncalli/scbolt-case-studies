@@ -26,7 +26,7 @@ Initialize the project:
 scbolt init params-gsm.mk
 ```
 
-Optionally validate the project:
+Before running the inference, you may inspect the project configuration and dependencies with:
 
 ```bash
 scbolt check bn-submin
@@ -63,7 +63,7 @@ The `notebooks/` directory contains exploratory analyses and figure-generation n
 Create and activate the dedicated case-study environment:
 
 ```bash
-conda env create -f ../envs/scbolt-case.yml
+conda env create -f ../envs/scbolt-cs.yml
 conda activate scbolt-cs
 ```
 
@@ -77,8 +77,8 @@ jupyter lab
 
 ```text
 apl/
-├── params-gsm.mk      # GEO-based reproduction path
-├── params-sra.mk      # SRA-based reproduction path
+├── params-gsm.mk      # parameters for the GEO-based entry point
+├── params-sra.mk      # parameters for the SRA-based entry point
 ├── spec.yml           # BoNesis specification
 ├── notebooks/         # exploratory analyses
 └── figures/           # manuscript figure generation
