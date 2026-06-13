@@ -40,7 +40,7 @@ MAD_DEVIATION = 3 2
 DIM_PCA = 15
 DIM_CLUSTERING = 15
 NEIGHBORS = 10
-RESOLUTION = 0.38
+RESOLUTION = 0.35
 MIN_DIST = 0.5
 SPREAD = 2.0
 
@@ -58,6 +58,9 @@ MACROSTATE_METHOD = knnsc
 
 ### bin-cells ###
 ZEROES_ARE_ZEROES = false
+
+### max-nodes-seed ###
+TIMEOUT_SEED=48h
 
 ### bn-submin ###
 MIN_SELF_LOOP_INFER = true

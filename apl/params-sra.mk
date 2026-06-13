@@ -30,6 +30,9 @@ DOROTHEA_LEVELS = A
 ### Module-specific inputs ###
 ##############################
 
+### alignment tool ###
+ALIGNMENT_TOOL = cellranger
+
 ### hvg ###
 ANALYSIS_HVG_FLAVOR = seurat_v3
 ANALYSIS_HVG_TOP = 2000
