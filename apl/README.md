@@ -58,19 +58,33 @@ scbolt potency
 
 ## Notebooks
 
-The `notebooks/` directory contains exploratory analyses and figure-generation notebooks used during the preparation of the manuscript.
+The `notebooks/` directory contains the readable figure-generation notebooks used during the preparation of the manuscript:
 
-Create and activate the dedicated case-study environment:
+- `notebooks/omics.ipynb`: transcriptomic integration, potency analysis, macrostate characterisation, and binarisation diagnostics.
+- `notebooks/bn.ipynb`: Boolean-network specification, inference, and downstream analyses.
+
+`omics.ipynb` assumes that the case-study data have been generated or copied into `apl/data/`. Figures are exported to `apl/figures/`.
+
+### Running `omics.ipynb`
+
+From `apl/`, create and activate the notebook environment:
 
 ```bash
 conda env create -f ../envs/scbolt-cs.yml
 conda activate scbolt-cs
 ```
 
-Launch JupyterLab with:
+Launch one of the notebooks:
 
 ```bash
-jupyter lab
+jupyter lab notebooks/omics.ipynb
+jupyter lab notebooks/bn.ipynb
+```
+
+If Jupyter does not list the environment as a kernel, register it once:
+
+```bash
+python -m ipykernel install --user --name scbolt-cs --display-name "Python (scbolt-cs)"
 ```
 
 ## Repository structure

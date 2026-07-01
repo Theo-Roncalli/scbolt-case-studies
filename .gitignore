@@ -218,6 +218,66 @@ __marimo__/
 .streamlit/secrets.toml
 
 # Others
+
+# Editors / local workspace files
+.vscode/
+.idea/
+*.code-workspace
+launch.json
+settings.json
+jsconfig.json
+tsconfig.json
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Logs / temporary / duplicate local files
+logs/
+*.tmp
+*.bak
+*copy/
+*copy.*
+*tmp*
+*tmp/
+*test*/
+*debug*/
+turbostat_*
+
+# Project data and generated analysis outputs
+data/
+resources/
+scbolt/
+project_gsm/
+project_gsm\ \(copy\)/
+nestorowa/
+project/
+results/
+**/figures/*.pdf
+**/figures/*.png
+**/figures/*.jpg
+**/figures/*.svg
+**/figures/*.tiff
+!**/figures/.placeholder
+
+# Large single-cell / sequencing artifacts
+*.bam
+*.bai
+*.h5ad
+*.h5mu
+*.loom
+*.rds
+*.fastq
+*.fastq.gz
+*.fq
+*.fq.gz
+*.tar.gz
+*.mro
+*.bin
+*.desc
+*.scbolt.json
+*.pkl
 .ipynb_checkpoints/
 .scbolt
 project/
