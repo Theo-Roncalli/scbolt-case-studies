@@ -56,6 +56,16 @@ scbolt init params-gsm.mk
 scbolt potency
 ```
 
+GO enrichment tables can also be regenerated directly from the processed APL AnnData object with:
+
+```bash
+conda activate scbolt-cs
+python scripts/goea.py data/omics/integrated.h5ad
+```
+
+The output workbook is written to `results/goea/basic.xlsx`. The DEA table used
+for enrichment is kept in `results/goea/markers.csv`.
+
 ## Notebooks
 
 The `notebooks/` directory contains the readable figure-generation notebooks used during the preparation of the manuscript:
