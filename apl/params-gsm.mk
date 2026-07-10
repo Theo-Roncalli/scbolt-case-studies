@@ -18,10 +18,11 @@ GSM_TREATED = GSM5492246
 ##########################
 
 GENEINFO_VERSION = bundled
-
 PRIOR_KNOWLEDGE = dorothea
-DOROTHEA_API = modern
-DOROTHEA_LEVELS = A B
+#DOROTHEA_API = modern
+#DOROTHEA_LEVELS = A B
+DOROTHEA_API = legacy
+DOROTHEA_LEVELS = A
 DOROTHEA_COMPATIBILITY = true
 OMNIPATH_VERSION = 2025-08-13
 HCOP_VERSION = bundled
@@ -31,7 +32,7 @@ HCOP_VERSION = bundled
 ##############################
 
 ### hvg ###
-ANALYSIS_HVG_FLAVOR = seurat_v3
+ANALYSIS_HVG_METHOD = loess
 ANALYSIS_HVG_TOP = 2000
 
 ### filtering ###
@@ -55,20 +56,23 @@ KNNSC_PERIPHERY_CTRL = Rep Neu Alt
 KNNSC_CENTRALITY_TREATED = Prom1 Prom2
 KNNSC_PERIPHERY_TREATED = Rep Neu
 
+BIN_HVG_METHOD = binning
+BIN_HVG_TOP =
+
 ### bin-cells ###
 ZEROES_ARE_ZEROES = false
 
 ### inference ###
 MAX_CLAUSE = 4
-JOBS_SOFT = 8
-JOBS_CONSTS = 8
-JOBS_RELAXED = 8
-JOBS_SEED = 8
-JOBS_LOCK = 8
 
-
-TIMEOUT_SEED=48h
+TIMEOUT_SEED = 5h
 
 ### bn-submin ###
 MIN_SELF_LOOP_INFER = true
 INFER_LIMIT = 1000
+
+####### TMP ########
+
+#CLINGO_OPT_MODE_SEED = opt
+#CLINGO_OPT_STRATEGY_SEED = bb,inc
+#JOBS_RELAXED = 1

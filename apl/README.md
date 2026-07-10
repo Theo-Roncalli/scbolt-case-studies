@@ -66,6 +66,16 @@ python scripts/goea.py data/omics/integrated.h5ad
 The output workbook is written to `results/goea/basic.xlsx`. The DEA table used
 for enrichment is kept in `results/goea/markers.csv`.
 
+Runtime, CPU, memory, and energy-related statistics for a full APL run can be
+collected with:
+
+```bash
+scripts/run_pipeline_turbostat.sh
+```
+
+The wrapper runs `bn-submin` after resetting `load-matrix` and `load-cc`.
+Run logs and summary tables are written to `stat/`.
+
 ## Notebooks
 
 The `notebooks/` directory contains the readable figure-generation notebooks used during the preparation of the manuscript:
