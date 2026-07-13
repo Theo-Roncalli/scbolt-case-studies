@@ -262,6 +262,7 @@ results/
 !**/figures/.placeholder
 
 # Large single-cell / sequencing artifacts
+*.zginml
 *.bam
 *.bai
 *.h5ad
@@ -282,3 +283,5 @@ results/
 .scbolt
 project/
 resources/
+
+!apl/data

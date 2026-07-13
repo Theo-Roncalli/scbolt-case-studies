@@ -83,7 +83,15 @@ The `notebooks/` directory contains the readable figure-generation notebooks use
 - `notebooks/omics.ipynb`: transcriptomic integration, potency analysis, macrostate characterisation, and binarisation diagnostics.
 - `notebooks/bn.ipynb`: Boolean-network specification, inference, and downstream analyses.
 
-`omics.ipynb` assumes that the case-study data have been generated or copied into `apl/data/`. Figures are exported to `apl/figures/`.
+After running `bn-submin` and `potency`, export the results required by the notebooks:
+
+```bash
+python scripts/export_notebook_data.py --force
+```
+
+The script detects the macrostate method available under `project_gsm/`, copies only
+the Boolean-network models and configurations, and prepares the omics files under
+`data/`. Figures are exported to `figures/`.
 
 ### Running `omics.ipynb`
 

@@ -2,12 +2,12 @@ dynamical_constraints:
 # configurations
   - ctrl_prom1 = ~obs('ctrl_Prom1')
   - ctrl_prom2 = ~obs('ctrl_Prom2')
-  - ctrl_rep = fixed(obs('ctrl_Rep'))
+  - ctrl_rep = fixed(~obs('ctrl_Rep'))
   - ctrl_neu = fixed(~obs('ctrl_Neu'))
   - ctrl_alt = fixed(~obs('ctrl_Alt'))
   - treated_prom1 = ~obs('treated_Prom1')
   - treated_prom2 = ~obs('treated_Prom2')
-  - treated_rep = fixed(obs('treated_Rep'))
+  - treated_rep = fixed(~obs('treated_Rep'))
   - treated_neu = fixed(~obs('treated_Neu'))
 # inequalities
   - ctrl_prom1 != treated_prom1
