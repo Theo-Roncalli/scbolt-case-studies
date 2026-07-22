@@ -35,42 +35,49 @@ dynamical_constraints:
   - treated_prom2 >> 'fixpoints' ^ {obs('treated_Neu')}
 important_nodes:
 # granulocytic differentiation
-  - 'Rara'
-  - 'Rarb'
-  - 'Cebpe'
-  - 'Cebpa'
-  - 'Zfp36l1' # Plzf
-  - 'Spi1'
+  - Rara
+  - Rarb
+  - Zbtb16
+  - Cebpe
+  - Cebpa
+  - Spi1
 # proliferation / cell cycle
-  - 'Myc'
-  - 'Skp2'
-  - 'Ccna2'
-  - 'Mdm2'
-  - 'E2f1'
-  - 'Ccnd1'
-  - 'Cdk2'
-  - 'Cdk4'
-  - 'Cdk6'
-  - 'Pcna'
-  - 'Pim1'
+  - Myc
+  - Skp2
+  - Ccna2
+  - Mdm2
+  - E2f1
+  - Ccnd1
+  - Cdk2
+  - Cdk4
+  - Cdk6
+  - Pcna
+  - Pim1
 # cell-cycle arrest / tumor suppressors
-  - 'Cdkn2d'
-  - 'Rb1'
-  - 'Cdkn1a'
-  - 'Cdkn1b'
-  - 'Trp53' # Tp53
-  - 'Bax'
+  - Cdkn2d
+  - Rb1
+  - Cdkn1a
+  - Cdkn1b
+  - Trp53 # Tp53
+  - Bax
 # epigenetic regulation
-  - 'Ezh2'
+  - Ezh2
 # inflammatory signaling
-  - 'Nfkb1'
-  - 'Traf1'
+  - Nfkb1
+  - Traf1
 # ER stress
-  - 'Ddit4'
-  - 'Ppp1r15a'
+  - Ddit4
+  - Ppp1r15a
 # Eosinophil marker
-  - 'Epx'
-  - 'Alox15'
+  - Epx
+  - Alox15
+  - Prg3
+  - Ear6
 # Neutrophil marker
-  - 's100a9'
+  - S100a8
+  - s100a9
+  - Ly6g
+  - Ngp
+# APL resistance
+  - Usp37
 mandatory_nodes:

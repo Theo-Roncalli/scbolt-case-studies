@@ -26,6 +26,10 @@ CONDITION_H5ADS = {
     Path("omics/ctrl.h5ad"),
     Path("omics/treated.h5ad"),
 }
+POTENCY_FILES = {
+    "ctrl": Path("omics/trajectories/potency/ctrl/potency.csv"),
+    "treated": Path("omics/trajectories/potency/treated/potency.csv"),
+}
 
 
 def parse_args() -> argparse.Namespace:
@@ -105,14 +109,18 @@ def discover_binarisation_method(project_dir: Path) -> str:
 
 def discover_bn_files(project_dir: Path) -> dict[Path, Path]:
     source_dir = project_dir / "infer" / "bn" / "submin"
-    solution_dirs = sorted(
-        (
-            path
-            for path in source_dir.iterdir()
-            if path.is_dir() and path.name.isdigit()
-        ),
-        key=lambda path: int(path.name),
-    ) if source_dir.is_dir() else []
+    solution_dirs = (
+        sorted(
+            (
+                path
+                for path in source_dir.iterdir()
+                if path.is_dir() and path.name.isdigit()
+            ),
+            key=lambda path: int(path.name),
+        )
+        if source_dir.is_dir()
+        else []
+    )
 
     if not solution_dirs:
         raise FileNotFoundError(f"no numerical BN solution found under {source_dir}")
@@ -126,7 +134,9 @@ def discover_bn_files(project_dir: Path) -> dict[Path, Path]:
     return files
 
 
-def build_export_plan(project_dir: Path) -> tuple[str, str, dict[Path, Path]]:
+def build_export_plan(
+    project_dir: Path,
+) -> tuple[str, str, dict[Path, Path], dict[str, Path]]:
     project_dir = project_dir.resolve()
     method, ctrl, treated = discover_macrostate_method(project_dir)
     bin_method = discover_binarisation_method(project_dir)
@@ -140,31 +150,15 @@ def build_export_plan(project_dir: Path) -> tuple[str, str, dict[Path, Path]]:
                 project_dir / "omics" / "annot" / "integrated" / "annot.h5ad"
             ),
             Path("omics/mstates_bin.csv"): require_file(
-                project_dir
-                / "bin"
-                / bin_method
-                / method
-                / "mstates_bin.csv"
-            ),
-            Path("omics/potency_ctrl.csv"): require_file(
-                project_dir
-                / "omics"
-                / "trajectories"
-                / "potency"
-                / "ctrl"
-                / "potency.csv"
-            ),
-            Path("omics/potency_treated.csv"): require_file(
-                project_dir
-                / "omics"
-                / "trajectories"
-                / "potency"
-                / "treated"
-                / "potency.csv"
+                project_dir / "bin" / bin_method / method / "mstates_bin.csv"
             ),
         }
     )
-    return method, bin_method, files
+    potency_files = {
+        condition: require_file(project_dir / relative_path)
+        for condition, relative_path in POTENCY_FILES.items()
+    }
+    return method, bin_method, files, potency_files
 
 
 def path_size(path: Path) -> int:
@@ -184,12 +178,43 @@ def format_size(size: int) -> str:
     raise AssertionError("unreachable")
 
 
-def export_integrated_h5ad(source: Path, destination: Path) -> None:
+def export_integrated_h5ad(
+    source: Path,
+    destination: Path,
+    potency_files: dict[str, Path],
+) -> None:
     adata = ad.read_h5ad(source, backed="r")
     try:
-        marker_expression = adata[:, MARKER_GENES].to_memory().layers["log-norm"]
+        obs = adata.obs.loc[:, ["condition", "label"]].copy()
+        potency_scores = pd.concat(
+            {
+                condition: pd.read_csv(file, index_col=0)["score"]
+                for condition, file in potency_files.items()
+            },
+            names=["condition", "barcode"],
+        )
+        if not potency_scores.index.is_unique:
+            raise RuntimeError("potency scores contain duplicate cell identifiers")
+
+        barcodes = obs.index.to_series().str.split(":", n=1).str[-1]
+        potency_index = pd.MultiIndex.from_arrays(
+            [obs["condition"].astype(str), barcodes],
+            names=["condition", "barcode"],
+        )
+        scores = potency_scores.reindex(potency_index)
+        if scores.isna().any():
+            missing = potency_index[scores.isna()]
+            examples = ", ".join(
+                f"{condition}:{barcode}" for condition, barcode in missing[:5]
+            )
+            raise RuntimeError(
+                f"missing potency scores for {len(missing)} cells: {examples}"
+            )
+        obs["potency_score"] = scores.to_numpy()
+
+        marker_expression = adata[:, MARKER_GENES].layers["log-norm"].copy()
         exported = ad.AnnData(
-            obs=adata.obs.loc[:, ["condition", "label"]].copy(),
+            obs=obs,
             var=pd.DataFrame(index=MARKER_GENES),
             obsm={"X_umap": adata.obsm["X_umap"].copy()},
             layers={"log-norm": marker_expression},
@@ -256,7 +281,12 @@ def restrict_binarisation_to_hvgs(integrated_file: Path, output_dir: Path) -> No
     binarisation.loc[:, hvgs].to_csv(binarisation_file)
 
 
-def export(files: dict[Path, Path], output_dir: Path, force: bool) -> None:
+def export(
+    files: dict[Path, Path],
+    potency_files: dict[str, Path],
+    output_dir: Path,
+    force: bool,
+) -> None:
     output_dir = output_dir.resolve()
     managed_dirs = [output_dir / "bn", output_dir / "omics"]
     legacy_outputs = [output_dir / path for path in LEGACY_OUTPUTS]
@@ -264,7 +294,9 @@ def export(files: dict[Path, Path], output_dir: Path, force: bool) -> None:
 
     if existing and not force:
         names = ", ".join(str(path) for path in existing)
-        raise FileExistsError(f"output already exists: {names}; use --force to replace it")
+        raise FileExistsError(
+            f"output already exists: {names}; use --force to replace it"
+        )
 
     required_size = estimated_export_size(files)
     reclaimable_size = sum(path_size(path) for path in existing)
@@ -288,7 +320,7 @@ def export(files: dict[Path, Path], output_dir: Path, force: bool) -> None:
         destination = output_dir / relative_path
         destination.parent.mkdir(parents=True, exist_ok=True)
         if relative_path == INTEGRATED_H5AD:
-            export_integrated_h5ad(source, destination)
+            export_integrated_h5ad(source, destination, potency_files)
         elif relative_path in CONDITION_H5ADS:
             export_condition_h5ad(source, destination)
         else:
@@ -300,7 +332,7 @@ def export(files: dict[Path, Path], output_dir: Path, force: bool) -> None:
 def main() -> None:
     args = parse_args()
     try:
-        method, bin_method, files = build_export_plan(args.project_dir)
+        method, bin_method, files, potency_files = build_export_plan(args.project_dir)
         bn_count = sum(path.name == "model.bnet" for path in files)
         total_size = estimated_export_size(files)
 
@@ -309,6 +341,7 @@ def main() -> None:
         print(f"macrostate method: {method}")
         print(f"binarization method: {bin_method}")
         print(f"HVGs: automatic cutoff (expected: {EXPECTED_HVG_COUNT})")
+        print("potency scores: embedded in omics/integrated.h5ad")
         print(f"Boolean networks: {bn_count}")
         print(f"files: {len(files)}")
         print(f"estimated size (upper bound): {format_size(total_size)}")
@@ -317,7 +350,7 @@ def main() -> None:
             print("dry run: no files copied")
             return
 
-        export(files, args.output_dir, force=args.force)
+        export(files, potency_files, args.output_dir, force=args.force)
     except (OSError, RuntimeError) as error:
         message = f"error: {error}"
         if "potency" in str(error):

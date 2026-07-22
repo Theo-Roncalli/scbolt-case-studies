@@ -2,6 +2,15 @@
 
 Reproduction of the PLZF-RARα acute promyelocytic leukemia (APL) analyses presented in the scBOLT manuscript, based on the dataset from [Poplineau et al. (2022)](https://ashpublications.org/blood/article/140/22/2358/486349/Noncanonical-EZH2-drives-retinoic-acid-resistance).
 
+## Environment
+
+From `apl/`:
+
+```bash
+conda env create -f ../envs/scbolt-cs.yml
+conda activate scbolt-cs
+```
+
 ## Entry points
 
 | Parameter file  | Input source       | Output directory |
@@ -56,16 +65,6 @@ scbolt init params-gsm.mk
 scbolt potency
 ```
 
-GO enrichment tables can also be regenerated directly from the processed APL AnnData object with:
-
-```bash
-conda activate scbolt-cs
-python scripts/goea.py data/omics/integrated.h5ad
-```
-
-The output workbook is written to `results/goea/basic.xlsx`. The DEA table used
-for enrichment is kept in `results/goea/markers.csv`.
-
 Runtime, CPU, memory, and energy-related statistics for a full APL run can be
 collected with:
 
@@ -86,21 +85,20 @@ The `notebooks/` directory contains the readable figure-generation notebooks use
 After running `bn-submin` and `potency`, export the results required by the notebooks:
 
 ```bash
-python scripts/export_notebook_data.py --force
+python scripts/build_notebook_data.py --force
 ```
 
 The script detects the macrostate method available under `project_gsm/`, copies only
 the Boolean-network models and configurations, and prepares the omics files under
 `data/`. Figures are exported to `figures/`.
 
-### Running `omics.ipynb`
-
-From `apl/`, create and activate the notebook environment:
+Regenerate the GO enrichment tables:
 
 ```bash
-conda env create -f ../envs/scbolt-cs.yml
-conda activate scbolt-cs
+python scripts/goea.py data/omics/integrated.h5ad
 ```
+
+Outputs are written to `results/goea/`.
 
 Launch one of the notebooks:
 
