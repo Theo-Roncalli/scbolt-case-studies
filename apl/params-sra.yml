@@ -1,0 +1,46 @@
+# scBOLT APL project configuration from SRA runs.
+
+project-dir: project_sra
+spec-file: spec.yml
+organism: mouse
+conditions: [ctrl, treated]
+seed: 15
+
+sra:
+  ctrl: [SRR15305311, SRR15305312, SRR15305313, SRR15305314]
+  treated: [SRR15305315, SRR15305316, SRR15305317, SRR15305318]
+
+geneinfo-version: bundled
+prior-knowledge: dorothea
+omnipath-version: 2025-08-13
+hcop-version: bundled
+dorothea-api: legacy
+dorothea-compatibility: true
+dorothea-levels: [A]
+
+alignment-tool: cellranger
+
+omics-hvg-method: loess
+omics-hvg-top: 2000
+mad-deviation: [3, 2]
+
+pca-dimensions: 15
+neighbors: 10
+resolution: 0.42
+umap-min-dist: 0.5
+umap-spread: 2.0
+
+labels: [Prom1, Prom2, Cycl, Rep, Neu, Alt]
+
+macrostate-method: knnsc
+knnsc-centrality:
+  ctrl: [Prom1, Prom2]
+  treated: [Prom1, Prom2]
+knnsc-periphery:
+  ctrl: [Rep, Neu, Alt]
+  treated: [Rep, Neu]
+
+zeroes-are-zeroes: false
+
+minimize-self-loops-inference: true
+inference-limit: 100

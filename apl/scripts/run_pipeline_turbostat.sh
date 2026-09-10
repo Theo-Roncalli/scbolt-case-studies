@@ -5,10 +5,11 @@ set -euo pipefail
 APL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$APL_DIR"
 
-PARAMS="${PARAMS:-params-gsm.mk}"
-INTERVAL="${TURBOSTAT_INTERVAL:-5}"
+PARAMS="${PARAMS:-params-gsm.yml}"
+INTERVAL="${TURBOSTAT_INTERVAL:-10}"
 OUT_DIR="${SCBOLT_STATS_DIR:-$APL_DIR/stat}"
-RUN_ID="$(date +%Y%m%d-%H%M%S)"
+RUN_ID="${SCBOLT_STATS_RUN_ID:-pipeline}"
+SCBOLT_CLEAN_ALL="${SCBOLT_CLEAN_ALL:-true}"
 
 TURBOSTAT_LOG="$OUT_DIR/${RUN_ID}.turbostat.txt"
 TURBOSTAT_SUMMARY="$OUT_DIR/${RUN_ID}.turbostat-summary.tsv"
@@ -24,7 +25,7 @@ if [ "${#TARGETS[@]}" -eq 0 ]; then
     TARGETS=(bn-submin)
 fi
 
-RESET_TARGETS_TEXT="${SCBOLT_RESET_TARGETS-load-matrix load-cc load-go}"
+RESET_TARGETS_TEXT="${SCBOLT_RESET_TARGETS-}"
 RESET_TARGETS=()
 if [ -n "$RESET_TARGETS_TEXT" ]; then
     read -r -a RESET_TARGETS <<<"$RESET_TARGETS_TEXT"
@@ -34,6 +35,7 @@ export SCBOLT_RESET_TARGETS_TEXT="$RESET_TARGETS_TEXT"
 command -v scbolt >/dev/null
 command -v turbostat >/dev/null
 command -v python3 >/dev/null
+command -v stdbuf >/dev/null
 test -x /usr/bin/time
 
 mkdir -p "$OUT_DIR"
@@ -41,6 +43,7 @@ mkdir -p "$OUT_DIR"
 echo "[run] APL directory: $APL_DIR"
 echo "[run] parameter file: $PARAMS"
 echo "[run] targets: ${TARGETS[*]}"
+echo "[run] clean all: $SCBOLT_CLEAN_ALL"
 echo "[run] reset targets: ${RESET_TARGETS[*]:-none}"
 echo "[run] turbostat log: $TURBOSTAT_LOG"
 echo "[run] pipeline log: $PIPELINE_LOG"
@@ -52,6 +55,7 @@ echo "[run] summary: $SUMMARY_TSV"
     echo "apl_dir: $APL_DIR"
     echo "params: $PARAMS"
     echo "targets: ${TARGETS[*]}"
+    echo "clean_all: $SCBOLT_CLEAN_ALL"
     echo "reset_targets: ${RESET_TARGETS[*]:-none}"
     echo "conda_default_env: ${CONDA_DEFAULT_ENV:-}"
     echo "scbolt: $(command -v scbolt)"
@@ -248,7 +252,8 @@ START_ISO="$(date --iso-8601=seconds)"
 
 set +e
 {
-    /usr/bin/time -v -o "$TIME_LOG" bash -s -- "$PARAMS" "${TARGETS[@]}" <<'PIPELINE'
+    /usr/bin/time -v -o "$TIME_LOG" stdbuf -oL -eL \
+        bash -s -- "$PARAMS" "${TARGETS[@]}" <<'PIPELINE'
 set -euo pipefail
 
 PARAMS="$1"
@@ -260,6 +265,15 @@ fi
 
 echo "[pipeline] scbolt init $PARAMS"
 scbolt init "$PARAMS"
+
+if [ "${SCBOLT_CLEAN_ALL:-true}" = "true" ]; then
+    echo "[pipeline] scbolt clean --all"
+    if [ ! -r /dev/tty ]; then
+        echo "[pipeline] error: clean --all requires an interactive terminal" >&2
+        exit 1
+    fi
+    scbolt clean --all </dev/tty
+fi
 
 for target in "$@"; do
     if [ "${#RESET_TARGETS[@]}" -gt 0 ]; then
@@ -284,5 +298,21 @@ write_summary "$PIPELINE_STATUS" "$START_EPOCH" "$END_EPOCH" "$START_ISO" "$END_
 
 echo "[run] status: $PIPELINE_STATUS"
 echo "[run] summary: $SUMMARY_TSV"
+
+echo
+echo "== pipeline summary =="
+if command -v column >/dev/null; then
+    column -t -s $'\t' "$SUMMARY_TSV"
+else
+    cat "$SUMMARY_TSV"
+fi
+
+echo
+echo "== turbostat summary =="
+if command -v column >/dev/null; then
+    column -t -s $'\t' "$TURBOSTAT_SUMMARY"
+else
+    cat "$TURBOSTAT_SUMMARY"
+fi
 
 exit "$PIPELINE_STATUS"

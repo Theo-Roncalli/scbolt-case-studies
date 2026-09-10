@@ -1,4 +1,4 @@
-dynamical_constraints:
+constraints:
 # configurations
   - ctrl_prom1 = ~obs('ctrl_Prom1')
   - ctrl_prom2 = ~obs('ctrl_Prom2')
@@ -33,7 +33,7 @@ dynamical_constraints:
   - ctrl_prom2 >> 'fixpoints' ^ {obs('ctrl_Neu'), obs('ctrl_Alt')}
   - treated_prom1 >> 'fixpoints' ^ {obs('treated_Rep'), obs('treated_Neu')}
   - treated_prom2 >> 'fixpoints' ^ {obs('treated_Neu')}
-important_nodes:
+important-nodes:
 # granulocytic differentiation
   - Rara
   - Rarb
@@ -75,9 +75,10 @@ important_nodes:
   - Ear6
 # Neutrophil marker
   - S100a8
-  - s100a9
+  - S100a9
   - Ly6g
   - Ngp
 # APL resistance
   - Usp37
-mandatory_nodes:
+mandatory-nodes: []
+forbidden-nodes: []

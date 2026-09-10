@@ -1,0 +1,98 @@
+# scBOLT APL project configuration.
+
+project-dir: project_gsm
+inference-dir: infer
+spec-file: spec.yml
+organism: mouse
+conditions: [ctrl, treated]
+
+gsm:
+  ctrl: GSM5492245
+  treated: GSM5492246
+
+geneinfo-version: bundled
+prior-knowledge: dorothea
+dorothea-api: modern
+dorothea-levels: [A, B]
+dorothea-compatibility: true
+omnipath-version: 2025-08-13
+hcop-version: bundled
+
+omics-hvg-method: loess
+omics-hvg-top: 2000
+
+mad-deviation: [3, 2]
+mitochondrial-fraction: 0.30
+
+pca-dimensions: 15
+neighbors: 14
+resolution: 0.4
+umap-min-dist: 0.5
+umap-spread: 2.0
+
+labels: [Prom1, Prom2, Rep, Cycl, Neu, Alt]
+
+macrostate-method: knnsc
+knnsc-centrality:
+  ctrl: [Prom1, Prom2]
+  treated: [Prom1, Prom2]
+knnsc-periphery:
+  ctrl: [Rep, Neu, Alt]
+  treated: [Rep, Neu]
+
+bin-hvg-method: binning
+bin-hvg-top: null
+bin-include-nodes:
+  - Rara
+  - Rarb
+  - Zbtb16
+  - Cebpe
+  - Cebpa
+  - Spi1
+  - Myc
+  - Skp2
+  - Ccna2
+  - Mdm2
+  - E2f1
+  - Ccnd1
+  - Cdk2
+  - Cdk4
+  - Cdk6
+  - Pcna
+  - Pim1
+  - Cdkn2d
+  - Rb1
+  - Cdkn1a
+  - Cdkn1b
+  - Trp53
+  - Bax
+  - Ezh2
+  - Nfkb1
+  - Traf1
+  - Ddit4
+  - Ppp1r15a
+  - Epx
+  - Alox15
+  - Prg3
+  - Ear6
+  - S100a8
+  - S100a9
+  - Ly6g
+  - Ngp
+  - Usp37
+zeroes-are-zeroes: false
+
+max-clauses: 4
+
+clause-continuation-soft: true
+domain-continuation-soft: true
+clingo-mode-soft: opt
+clingo-strategy-soft: bb,inc
+
+timeout-soft: 15h
+timeout-relaxed: 2h
+timeout-seed: 5h
+timeout-lock: "0"
+
+minimize-self-loops-inference: true
+inference-limit: 1000

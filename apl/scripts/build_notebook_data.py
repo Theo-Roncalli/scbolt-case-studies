@@ -10,7 +10,6 @@ import shutil
 from pathlib import Path
 
 import anndata as ad
-import bonesistools as bt
 import pandas as pd
 
 
@@ -19,9 +18,9 @@ DEFAULT_PROJECT_DIR = APL_DIR / "project_gsm"
 DEFAULT_OUTPUT_DIR = APL_DIR / "data"
 LEGACY_OUTPUTS = ("potency", "mstates_bin.csv", "hvgs.txt")
 DEFAULT_BIN_METHOD = "consensus"
-EXPECTED_HVG_COUNT = 3228
-MARKER_GENES = ["S100a8", "S100a9", "Ly6g", "Ngp"]
+MARKER_GENES = ["S100a8", "S100a9", "Ly6g", "Ngp", "Spi1"]
 INTEGRATED_H5AD = Path("omics/integrated.h5ad")
+BINARISATION_CSV = Path("omics/mstates_bin.csv")
 CONDITION_H5ADS = {
     Path("omics/ctrl.h5ad"),
     Path("omics/treated.h5ad"),
@@ -149,8 +148,8 @@ def build_export_plan(
             Path("omics/integrated.h5ad"): require_file(
                 project_dir / "omics" / "annot" / "integrated" / "annot.h5ad"
             ),
-            Path("omics/mstates_bin.csv"): require_file(
-                project_dir / "bin" / bin_method / method / "mstates_bin.csv"
+            BINARISATION_CSV: require_file(
+                project_dir / "infer" / "spec" / "mstates.csv"
             ),
         }
     )
@@ -247,40 +246,6 @@ def estimated_export_size(files: dict[Path, Path]) -> int:
     return copied_size + 100 * 1024**2
 
 
-def restrict_binarisation_to_hvgs(integrated_file: Path, output_dir: Path) -> None:
-    binarisation_file = output_dir / "omics" / "mstates_bin.csv"
-
-    adata = ad.read_h5ad(integrated_file)
-    hvgs = (
-        bt.omics.pp.hvg(
-            adata,
-            expression="log-norm",
-            method="binning",
-            n_bins=20,
-            n_features=None,
-            batch_key="condition",
-            batch_selection="rank",
-            inplace=False,
-        )
-        .query("selected")
-        .index.tolist()
-    )
-    if len(hvgs) != EXPECTED_HVG_COUNT:
-        raise RuntimeError(
-            f"expected {EXPECTED_HVG_COUNT} HVGs but selected {len(hvgs)}"
-        )
-
-    binarisation = pd.read_csv(binarisation_file, index_col=0)
-    missing = sorted(set(hvgs) - set(binarisation.columns))
-    if missing:
-        raise RuntimeError(
-            f"{len(missing)} HVGs are absent from {binarisation_file}: "
-            + ", ".join(missing[:5])
-        )
-
-    binarisation.loc[:, hvgs].to_csv(binarisation_file)
-
-
 def export(
     files: dict[Path, Path],
     potency_files: dict[str, Path],
@@ -326,21 +291,24 @@ def export(
         else:
             shutil.copy2(source, destination)
 
-    restrict_binarisation_to_hvgs(files[INTEGRATED_H5AD], output_dir)
-
 
 def main() -> None:
     args = parse_args()
     try:
         method, bin_method, files, potency_files = build_export_plan(args.project_dir)
         bn_count = sum(path.name == "model.bnet" for path in files)
+        retained_gene_count = pd.read_csv(
+            files[BINARISATION_CSV],
+            index_col=0,
+            nrows=0,
+        ).shape[1]
         total_size = estimated_export_size(files)
 
         print(f"project: {args.project_dir.resolve()}")
         print(f"output: {args.output_dir.resolve()}")
         print(f"macrostate method: {method}")
         print(f"binarization method: {bin_method}")
-        print(f"HVGs: automatic cutoff (expected: {EXPECTED_HVG_COUNT})")
+        print(f"retained genes: {retained_gene_count}")
         print("potency scores: embedded in omics/integrated.h5ad")
         print(f"Boolean networks: {bn_count}")
         print(f"files: {len(files)}")
